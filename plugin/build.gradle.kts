@@ -7,7 +7,7 @@ plugins {
     `maven-publish`
     `java-gradle-plugin`
     groovy
-    id("com.gradle.plugin-publish") version "1.1.0"
+    alias(libs.plugins.publish)
 }
 
 group = "com.uwyn.rife2"
@@ -25,7 +25,10 @@ repositories {
 
 dependencies {
     gradleApi()
-    testImplementation("org.spockframework:spock-core:2.3-groovy-3.0")
+    compileOnly(libs.graalvm.plugin) {
+        because("In order to configure it if the user applies it")
+    }
+    testImplementation(libs.spock.core)
     testImplementation(gradleTestKit())
 }
 

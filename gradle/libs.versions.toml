@@ -1,0 +1,11 @@
+[versions]
+spock = "2.3-groovy-3.0"
+publish-plugin = "1.1.0"
+graalvm-gradle-plugin = "0.9.20"
+
+[libraries]
+spock-core = { module = "org.spockframework:spock-core", version.ref = "spock" }
+graalvm-plugin = { module = "org.graalvm.buildtools:native-gradle-plugin", version.ref = "graalvm-gradle-plugin" }
+
+[plugins]
+publish = { id = "com.gradle.plugin-publish", version.ref = "publish-plugin" }
