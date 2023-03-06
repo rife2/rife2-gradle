@@ -4,8 +4,37 @@
 
 # RIFE2 Gradle Plugin
 
-This project provides a Gradle plugin for RIFE2 applications 
+This project provides a Gradle plugin for RIFE2 applications.
 
+Using this plugin in your project can be done by adding the following to your
+Gradle `build.gradle.kts` file:
+
+```kotlin
+plugins {
+    // ...
+    id("com.uwyn.rife2") version "1.0.3"
+    // ...
+}
+```
+
+Afterwards, the `rife2` extension becomes available, and you can use it like
+this:
+
+```kotlin
+rife2 {
+    version.set("1.4.0")                                    // set the RIFE2 version to use
+    useAgent.set(true)                                      // set whether to run with the RIFE2 agent
+    precompiledTemplateTypes.add(HTML)                      // template types that should be pre-compiled
+    templateDirectories.from(file("src/main/templates"))    // additional template directories to use
+    includeServerDependencies.set(true)                     // set whether to include the embedded server deps
+}
+```
+
+The usual `run`, `test`, `jar` tasks are still available, the RIFE2 plugins adds
+the following:
+
+* `precompileTemplates` : performs the template pre-compilation of the activated types
+* `uberJar` : creates an Uber Jar with everything to run your application standalone
 ## Get in touch
 
 Thanks for using RIFE2!
