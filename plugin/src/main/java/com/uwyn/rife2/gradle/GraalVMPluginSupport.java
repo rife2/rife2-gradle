@@ -18,7 +18,6 @@ package com.uwyn.rife2.gradle;
 import org.graalvm.buildtools.gradle.dsl.GraalVMExtension;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.Sync;
-import org.gradle.api.tasks.TaskProvider;
 
 /**
  * Configures the GraalVM plugin.
@@ -31,12 +30,11 @@ public abstract class GraalVMPluginSupport {
     public static final String WEBAPP_DIR = "webapp";
 
     private GraalVMPluginSupport() {
-
     }
 
     public static void configureGraalVMPlugin(Project project, Rife2Extension rife2Extension) {
-        GraalVMExtension graalvm = project.getExtensions().findByType(GraalVMExtension.class);
-        TaskProvider<Sync> copyWebApp = project.getTasks().register("copyWebappResources", Sync.class, task -> {
+        var graalvm = project.getExtensions().findByType(GraalVMExtension.class);
+        var copyWebApp = project.getTasks().register("copyWebappResources", Sync.class, task -> {
             task.setDestinationDir(project.getLayout().getBuildDirectory().dir(WEBAPP_DIR).get().getAsFile());
             task.from(Rife2Plugin.WEBAPP_SRCDIR, copy -> copy.into(WEBAPP_DIR));
         });

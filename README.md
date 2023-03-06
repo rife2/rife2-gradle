@@ -36,6 +36,13 @@ the following:
 
 * `precompileTemplates` : performs the template pre-compilation of the activated types
 * `uberJar` : creates an Uber Jar with everything to run your application standalone
+
+## GraalVM Native Image support
+
+When your project uses the GraalVM Gradle plugin, the RIFE2 Gradle plugin will
+automatically configure the GraalVM plugin to properly include the web application
+resources into the native image.
+
 ## Get in touch
 
 Thanks for using RIFE2!

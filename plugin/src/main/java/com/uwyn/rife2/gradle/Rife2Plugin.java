@@ -117,7 +117,7 @@ public class Rife2Plugin implements Plugin<Project> {
                                                              Rife2Extension rife2Extension) {
         var test_config = configurations.getByName(JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME);
         test_config.getDependencies()
-                .add(dependencyHandler.create(project.files(precompileTemplatesTask)));
+            .add(dependencyHandler.create(project.files(precompileTemplatesTask)));
         addServerDependenciesWhenNeeded(project, test_config, dependencyHandler, rife2Extension);
     }
 
@@ -136,7 +136,7 @@ public class Rife2Plugin implements Plugin<Project> {
         rife2Extension.getTemplateDirectories().forEach(dir -> {
             if (dir.getAbsolutePath().contains("src/main/resources/")) {
                 rife2Extension.getPrecompiledTemplateTypes().get().forEach(templateType ->
-                        jar.exclude("/" + dir.getName() + "/**." + templateType.identifier().toLowerCase()));
+                    jar.exclude("/" + dir.getName() + "/**." + templateType.identifier().toLowerCase()));
             }
         });
     }
@@ -152,7 +152,7 @@ public class Rife2Plugin implements Plugin<Project> {
             conf.setCanBeResolved(false);
         });
         rife2DevelopmentOnly.getDependencies().addAllLater(templateDirectories.getElements().map(locations ->
-                locations.stream().map(fs -> dependencyHandler.create(project.files(fs))).collect(Collectors.toList()))
+            locations.stream().map(fs -> dependencyHandler.create(project.files(fs))).collect(Collectors.toList()))
         );
         addServerDependenciesWhenNeeded(project, rife2DevelopmentOnly, dependencyHandler, rife2Extension);
 
@@ -184,12 +184,12 @@ public class Rife2Plugin implements Plugin<Project> {
             jar.into("webapp", spec -> spec.from(WEBAPP_SRCDIR));
             var runtimeClasspath = project.getConfigurations().getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME);
             jar.from(runtimeClasspath.getElements().map(e -> e.stream()
-                    .filter(f -> f.getAsFile().getName().toLowerCase(Locale.ENGLISH).endsWith(".jar"))
-                    .map(project::zipTree)
-                    .toList()));
+                .filter(f -> f.getAsFile().getName().toLowerCase(Locale.ENGLISH).endsWith(".jar"))
+                .map(project::zipTree)
+                .toList()));
             excludeTemplateSourcesInClassPath(jar, rife2Extension);
             plugins.withId("application", unused -> jar.manifest(manifest ->
-                    manifest.getAttributes().put("Main-Class", rife2Extension.getUberMainClass().get()))
+                manifest.getAttributes().put("Main-Class", rife2Extension.getUberMainClass().get()))
             );
         });
     }
@@ -212,7 +212,7 @@ public class Rife2Plugin implements Plugin<Project> {
         var rife2 = project.getExtensions().create("rife2", Rife2Extension.class);
         rife2.getUseAgent().convention(false);
         rife2.getUberMainClass().convention(project.getExtensions().getByType(JavaApplication.class).getMainClass()
-                .map(mainClass -> mainClass + "Uber"));
+            .map(mainClass -> mainClass + "Uber"));
         DEFAULT_TEMPLATES_DIRS.stream().forEachOrdered(dir -> rife2.getTemplateDirectories().from(project.files(dir)));
         rife2.getIncludeServerDependencies().convention(true);
         return rife2;
@@ -237,7 +237,7 @@ public class Rife2Plugin implements Plugin<Project> {
             conf.setCanBeResolved(true);
             conf.setTransitive(false);
             conf.getDependencies().addLater(rife2Extension.getVersion()
-                    .map(version -> dependencyHandler.create(DEPENDENCY_RIFE_PREFIX + version + ":agent")));
+                .map(version -> dependencyHandler.create(DEPENDENCY_RIFE_PREFIX + version + ":agent")));
         });
     }
 
@@ -250,7 +250,7 @@ public class Rife2Plugin implements Plugin<Project> {
             conf.setCanBeResolved(false);
         });
         config.getDependencies().addLater(rife2Extension.getVersion()
-                .map(version -> dependencyHandler.create(DEPENDENCY_RIFE_PREFIX + version)));
+            .map(version -> dependencyHandler.create(DEPENDENCY_RIFE_PREFIX + version)));
         return config;
     }
 
