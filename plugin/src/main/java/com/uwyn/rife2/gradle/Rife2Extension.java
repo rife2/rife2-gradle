@@ -46,6 +46,15 @@ public abstract class Rife2Extension {
     public abstract Property<String> getUberMainClass();
 
     /**
+     * Specifies whether to include the dependencies for the embedded Jetty server.
+     * Defaults to {@code true}.
+     *
+     * @return {@code true} when the embedded server dependencies need to be included;
+     * {@code false} otherwise
+     */
+    public abstract Property<Boolean> getIncludeServerDependencies();
+
+    /**
      * Specifies the template types that should be precompiled.
      * By default, none are precompiled.
      *

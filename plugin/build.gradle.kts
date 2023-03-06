@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
     gradleApi()
-    testImplementation(libs.spock.core)
+    testImplementation("org.spockframework:spock-core:2.3-groovy-3.0")
     testImplementation(gradleTestKit())
 }
 
