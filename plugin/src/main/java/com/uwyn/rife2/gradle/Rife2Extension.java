@@ -40,6 +40,8 @@ public abstract class Rife2Extension {
 
     /**
      * Specifies the main Java class to use when building the uber jar.
+     * <p>
+     * This defaults to the same main class as your application.
      *
      * @return the fully qualified name of the main class to use when launching the uber jar.
      */

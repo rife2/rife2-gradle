@@ -212,7 +212,7 @@ public class Rife2Plugin implements Plugin<Project> {
         var rife2 = project.getExtensions().create("rife2", Rife2Extension.class);
         rife2.getUseAgent().convention(false);
         rife2.getUberMainClass().convention(project.getExtensions().getByType(JavaApplication.class).getMainClass()
-            .map(mainClass -> mainClass + "Uber"));
+            .map(mainClass -> mainClass));
         DEFAULT_TEMPLATES_DIRS.stream().forEachOrdered(dir -> rife2.getTemplateDirectories().from(project.files(dir)));
         rife2.getIncludeServerDependencies().convention(true);
         return rife2;

@@ -28,6 +28,7 @@ this:
 rife2 {
     version.set("1.4.0")                                    // set the RIFE2 version to use
     useAgent.set(true)                                      // set whether to run with the RIFE2 agent
+    uberMainClass.set("hello.AppUber")                      // set a different main class to use for the UberJar
     precompiledTemplateTypes.add(HTML)                      // template types that should be pre-compiled
     templateDirectories.from(file("src/main/templates"))    // additional template directories to use
     includeServerDependencies.set(true)                     // set whether to include the embedded server deps
