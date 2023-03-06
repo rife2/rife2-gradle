@@ -8,6 +8,12 @@ plugins {
 group = "com.uwyn.rife2"
 version = "1.0.2"
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 repositories {
     mavenCentral()
 }
