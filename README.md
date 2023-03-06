@@ -12,11 +12,14 @@ Gradle `build.gradle.kts` file:
 
 ```kotlin
 plugins {
-    // ...
+    application
     id("com.uwyn.rife2") version "1.0.3"
     // ...
 }
 ```
+
+> **NOTE:** the RIFE2 Gradle plugin relies on the presence of the `application`
+> plugin
 
 Afterwards, the `rife2` extension becomes available, and you can use it like
 this:
