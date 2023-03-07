@@ -198,11 +198,13 @@ public class Rife2Plugin implements Plugin<Project> {
                                        PluginContainer plugins,
                                        Rife2Extension rife2Extension,
                                        Configuration rife2AgentClasspath) {
-        CommandLineArgumentProvider agentProvider = () -> {
-            if (Boolean.TRUE.equals(rife2Extension.getUseAgent().get())) {
-                return Collections.singleton("-javaagent:" + rife2AgentClasspath.getAsPath());
+        CommandLineArgumentProvider agentProvider = new CommandLineArgumentProvider() {
+            public Iterable<String> asArguments() {
+                if (Boolean.TRUE.equals(rife2Extension.getUseAgent().get())) {
+                    return Collections.singleton("-javaagent:" + rife2AgentClasspath.getAsPath());
+                }
+                return Collections.emptyList();
             }
-            return Collections.emptyList();
         };
         project.getTasks().named("test", Test.class, test -> test.getJvmArgumentProviders().add(agentProvider));
         plugins.withId("application", unused -> project.getTasks().named("run", JavaExec.class, run -> run.getArgumentProviders().add(agentProvider)));
