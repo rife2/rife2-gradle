@@ -34,7 +34,7 @@ dependencies {
 
 gradlePlugin {
     website.set("https://rife2.com")
-    vcsUrl.set("https://github.com/gbevin/rife2-gradle")
+    vcsUrl.set("https://github.com/rife2/rife2-gradle")
 
     plugins {
         create("rife2") {
