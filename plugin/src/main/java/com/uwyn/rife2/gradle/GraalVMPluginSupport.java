@@ -16,7 +16,9 @@
 package com.uwyn.rife2.gradle;
 
 import org.graalvm.buildtools.gradle.dsl.GraalVMExtension;
+import org.graalvm.buildtools.gradle.dsl.GraalVMReachabilityMetadataRepositoryExtension;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.tasks.Sync;
 
 /**
@@ -43,5 +45,8 @@ public abstract class GraalVMPluginSupport {
             options.getClasspath().from(copyWebApp.map(Sync::getDestinationDir));
             options.getResources().getIncludedPatterns().add("^webapp/.*$");
         });
+
+        var reachability = ((ExtensionAware)graalvm).getExtensions().getByType(GraalVMReachabilityMetadataRepositoryExtension.class);
+        reachability.getEnabled().convention(true);
     }
 }
