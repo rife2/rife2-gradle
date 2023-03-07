@@ -198,6 +198,7 @@ public class Rife2Plugin implements Plugin<Project> {
                                        PluginContainer plugins,
                                        Rife2Extension rife2Extension,
                                        Configuration rife2AgentClasspath) {
+        // Do not make this a lambda since it will prevent Gradle from uniquely identifying the class
         CommandLineArgumentProvider agentProvider = new CommandLineArgumentProvider() {
             public Iterable<String> asArguments() {
                 if (Boolean.TRUE.equals(rife2Extension.getUseAgent().get())) {
