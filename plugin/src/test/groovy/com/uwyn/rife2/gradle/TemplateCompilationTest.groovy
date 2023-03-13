@@ -55,6 +55,6 @@ class TemplateCompilationTest extends AbstractFunctionalTest {
         }
 
         where:
-        task << ['jar', 'test', 'uberJar']
+        task << ['jar', 'test', 'uberjar']
     }
 }

@@ -33,6 +33,6 @@ class PackagingTest extends AbstractFunctionalTest {
         where:
         task      | archive
         'jar'     | 'build/libs/hello-1.0.jar'
-        'uberJar' | 'build/libs/hello-uber-1.0.jar'
+        'uberjar' | 'build/libs/hello-uber-1.0.jar'
     }
 }

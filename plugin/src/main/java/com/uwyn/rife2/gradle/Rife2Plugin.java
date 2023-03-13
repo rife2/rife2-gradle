@@ -173,7 +173,7 @@ public class Rife2Plugin implements Plugin<Project> {
                                                          Rife2Extension rife2Extension,
                                                          TaskContainer tasks,
                                                          TaskProvider<PrecompileTemplates> precompileTemplatesTask) {
-        return tasks.register("uberJar", Jar.class, jar -> {
+        return tasks.register("uberjar", Jar.class, jar -> {
             jar.setGroup(RIFE2_GROUP);
             jar.setDescription("Assembles the web application and all dependencies into a single jar archive.");
             var base = project.getExtensions().getByType(BasePluginExtension.class);
