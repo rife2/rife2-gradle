@@ -26,7 +26,7 @@ this:
 
 ```kotlin
 rife2 {
-    version.set("1.4.0")                                    // set the RIFE2 version to use
+    version.set("1.5.2")                                    // set the RIFE2 version to use
     useAgent.set(true)                                      // set whether to run with the RIFE2 agent
     uberMainClass.set("hello.AppUber")                      // set a different main class to use for the UberJar
     precompiledTemplateTypes.add(HTML)                      // template types that should be pre-compiled
