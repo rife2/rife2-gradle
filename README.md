@@ -13,7 +13,7 @@ Gradle `build.gradle.kts` file:
 ```kotlin
 plugins {
     application
-    id("com.uwyn.rife2") version "1.0.7"
+    id("com.uwyn.rife2") version "1.0.8"
     // ...
 }
 ```
@@ -26,7 +26,7 @@ this:
 
 ```kotlin
 rife2 {
-    version.set("1.5.3")                                    // set the RIFE2 version to use
+    version.set("1.5.4")                                    // set the RIFE2 version to use
     useAgent.set(true)                                      // set whether to run with the RIFE2 agent
     uberMainClass.set("hello.AppUber")                      // set a different main class to use for the UberJar
     precompiledTemplateTypes.add(HTML)                      // template types that should be pre-compiled
