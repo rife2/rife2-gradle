@@ -26,7 +26,7 @@ repositories {
 }
 
 rife2 {
-    version = "1.5.5"
+    version = "1.5.6"
     useAgent = true
     precompiledTemplateTypes.add(TemplateType.HTML)
     templateDirectories.from(file("src/main/templates"))
