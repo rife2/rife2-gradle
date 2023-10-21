@@ -26,13 +26,13 @@ repositories {
 }
 
 rife2 {
-    version = "1.7.2"
+    version = "1.7.3"
     useAgent = true
     precompiledTemplateTypes.add(TemplateType.HTML)
     templateDirectories.from(file("src/main/templates"))
 }
 
 dependencies {
-    testImplementation("org.jsoup:jsoup:1.15.3")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
+    testImplementation("org.jsoup:jsoup:1.16.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
 }

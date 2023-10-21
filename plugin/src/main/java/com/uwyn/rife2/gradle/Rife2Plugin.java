@@ -48,9 +48,9 @@ public class Rife2Plugin implements Plugin<Project> {
     static final String RIFE2_GROUP = "rife2";
     static final String WEBAPP_SRCDIR = "src/main/webapp";
     static final String PRECOMPILE_TEMPLATES_TASK_NAME = "precompileTemplates";
-    static final String DEPENDENCY_JETTY_SERVER = "org.eclipse.jetty:jetty-server:11.0.14";
-    static final String DEPENDENCY_JETTY_SERVLET = "org.eclipse.jetty:jetty-servlet:11.0.14";
-    static final String DEPENDENCY_SLF4J_SIMPLE = "org.slf4j:slf4j-simple:2.0.5";
+    static final String DEPENDENCY_JETTY_SERVER = "org.eclipse.jetty.ee10:jetty-ee10:12.0.2";
+    static final String DEPENDENCY_JETTY_SERVLET = "org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.2";
+    static final String DEPENDENCY_SLF4J_SIMPLE = "org.slf4j:slf4j-simple:2.0.9";
     static final String DEPENDENCY_RIFE_PREFIX = "com.uwyn.rife2:rife2:";
 
     @Override
