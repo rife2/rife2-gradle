@@ -3,12 +3,13 @@ package com.uwyn.rife2.gradle
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.gradle.util.GFileUtils
 import org.gradle.util.GradleVersion
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 
 abstract class AbstractFunctionalTest extends Specification {
 
@@ -117,7 +118,8 @@ abstract class AbstractFunctionalTest extends Specification {
     private ArrayList<String> computeAutoArgs() {
         List<String> autoArgs = [
                 "-s",
-                "--console=verbose"
+                "--console=verbose",
+                "--warning-mode=fail"
         ]
         if (Boolean.getBoolean("config.cache")) {
             autoArgs << '--configuration-cache'
@@ -174,8 +176,17 @@ abstract class AbstractFunctionalTest extends Specification {
     }
 
     void usesProject(String name) {
-        File sampleDir = new File("src/test-projects/$name")
-        GFileUtils.copyDirectory(sampleDir, testDirectory.toFile())
+        Path sampleDir = new File("src/test-projects/$name").toPath()
+        Files.walk(sampleDir).withCloseable { paths ->
+            paths.forEach { source ->
+                Path target = testDirectory.resolve(sampleDir.relativize(source).toString())
+                if (Files.isDirectory(source)) {
+                    Files.createDirectories(target)
+                } else {
+                    Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+        }
     }
 
     File file(String path) {

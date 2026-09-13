@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.uwyn.rife2"
-version = "1.2.0"
+version = "1.3.0"
 
 java {
     toolchain {
@@ -23,6 +23,8 @@ repositories {
     mavenCentral()
 }
 
+val graalvmTestPlugin = configurations.create("graalvmTestPlugin")
+
 dependencies {
     gradleApi()
     compileOnly(libs.graalvm.plugin) {
@@ -30,6 +32,8 @@ dependencies {
     }
     testImplementation(libs.spock.core)
     testImplementation(gradleTestKit())
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    graalvmTestPlugin(libs.graalvm.plugin)
 }
 
 gradlePlugin {
@@ -47,7 +51,14 @@ gradlePlugin {
     }
 }
 
+val testsBadgeApiKey = providers.gradleProperty("testsBadgeApiKey")
+val testGradleVersion = providers.gradleProperty("gradleVersion")
+
 tasks {
+    pluginUnderTestMetadata {
+        pluginClasspath.from(graalvmTestPlugin)
+    }
+
     javadoc {
         options {
             this as StandardJavadocDocletOptions
@@ -59,6 +70,7 @@ tasks {
 
     test {
         useJUnitPlatform()
+        testGradleVersion.orNull?.let { systemProperty("gradleVersion", it) }
         testLogging {
             exceptionFormat = TestExceptionFormat.FULL
             events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
@@ -73,8 +85,8 @@ tasks {
                     val failed = result.failedTestCount
                     val skipped = result.skippedTestCount
 
-                    if (project.properties["testsBadgeApiKey"] != null) {
-                        val apiKey = project.properties["testsBadgeApiKey"]
+                    if (testsBadgeApiKey.isPresent) {
+                        val apiKey = testsBadgeApiKey.get()
                         val response: HttpResponse<String> = HttpClient.newHttpClient()
                             .send(
                                 HttpRequest.newBuilder()

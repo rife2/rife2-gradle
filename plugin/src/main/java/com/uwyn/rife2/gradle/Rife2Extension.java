@@ -39,6 +39,18 @@ public abstract class Rife2Extension {
     public abstract Property<Boolean> getUseAgent();
 
     /**
+     * Indicates whether the compiled classes should be instrumented ahead of time,
+     * as an alternative to launching with the RIFE2 agent.
+     * <p>
+     * This is needed for continuations, the workflow engine, meta-data merging and
+     * lazy-loading inside a GraalVM native image. Defaults to {@code false}.
+     *
+     * @return {@code true} when the classes should be instrumented ahead of time;
+     * {@code false} otherwise
+     */
+    public abstract Property<Boolean> getInstrumentAheadOfTime();
+
+    /**
      * Specifies the main Java class to use when building the uber jar.
      * <p>
      * This defaults to the same main class as your application.

@@ -24,6 +24,7 @@ import org.gradle.api.attributes.Attribute;
 import org.gradle.api.attributes.Bundling;
 import org.gradle.api.component.AdhocComponentWithVariants;
 import org.gradle.api.component.ConfigurationVariantDetails;
+import org.gradle.api.file.ArchiveOperations;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.plugins.BasePluginExtension;
@@ -36,9 +37,11 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
+import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.testing.Test;
-import org.gradle.process.CommandLineArgumentProvider;
+import org.gradle.jvm.toolchain.JavaToolchainService;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,10 +51,19 @@ public class Rife2Plugin implements Plugin<Project> {
     static final String RIFE2_GROUP = "rife2";
     static final String WEBAPP_SRCDIR = "src/main/webapp";
     static final String PRECOMPILE_TEMPLATES_TASK_NAME = "precompileTemplates";
-    static final String DEPENDENCY_JETTY_SERVER = "org.eclipse.jetty.ee10:jetty-ee10:12.0.11";
-    static final String DEPENDENCY_JETTY_SERVLET = "org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.11";
-    static final String DEPENDENCY_SLF4J_SIMPLE = "org.slf4j:slf4j-simple:2.0.13";
+    static final String DEPENDENCY_JETTY_SERVER = "org.eclipse.jetty.ee10:jetty-ee10:12.1.13";
+    static final String DEPENDENCY_JETTY_SERVLET = "org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.13";
+    static final String DEPENDENCY_SLF4J_SIMPLE = "org.slf4j:slf4j-simple:2.0.19";
     static final String DEPENDENCY_RIFE_PREFIX = "com.uwyn.rife2:rife2:";
+
+    private final ArchiveOperations archiveOperations;
+    private final JavaToolchainService javaToolchains;
+
+    @Inject
+    public Rife2Plugin(ArchiveOperations archiveOperations, JavaToolchainService javaToolchains) {
+        this.archiveOperations = archiveOperations;
+        this.javaToolchains = javaToolchains;
+    }
 
     @Override
     public void apply(Project project) {
@@ -72,7 +84,8 @@ public class Rife2Plugin implements Plugin<Project> {
         createRife2DevelopmentOnlyConfiguration(project, configurations, dependencyHandler, rife2Extension.getTemplateDirectories(), rife2Extension);
         exposePrecompiledTemplatesToTestTask(project, configurations, dependencyHandler, precompileTemplates, rife2Extension);
         configureAgent(project, plugins, rife2Extension, rife2AgentClasspath);
-        TaskProvider<Jar> uberJarTask = registerUberJarTask(project, plugins, javaPluginExtension, rife2Extension, tasks, precompileTemplates);
+        configureAheadOfTimeInstrumentation(project, javaPluginExtension, rife2Extension, rife2CompilerClasspath, javaToolchains);
+        TaskProvider<Jar> uberJarTask = registerUberJarTask(project, plugins, javaPluginExtension, rife2Extension, tasks, precompileTemplates, archiveOperations);
         bundlePrecompiledTemplatesIntoJarFile(tasks, precompileTemplates, rife2Extension);
 
         configureMavenPublishing(project, plugins, configurations, uberJarTask);
@@ -172,12 +185,13 @@ public class Rife2Plugin implements Plugin<Project> {
                                                          JavaPluginExtension javaPluginExtension,
                                                          Rife2Extension rife2Extension,
                                                          TaskContainer tasks,
-                                                         TaskProvider<PrecompileTemplates> precompileTemplatesTask) {
+                                                         TaskProvider<PrecompileTemplates> precompileTemplatesTask,
+                                                         ArchiveOperations archiveOperations) {
         return tasks.register("uberjar", Jar.class, jar -> {
             jar.setGroup(RIFE2_GROUP);
             jar.setDescription("Assembles the web application and all dependencies into a single jar archive.");
             var base = project.getExtensions().getByType(BasePluginExtension.class);
-            jar.getArchiveBaseName().convention(project.provider(() -> base.getArchivesName().get() + "-uber"));
+            jar.getArchiveBaseName().convention(base.getArchivesName().map(name -> name + "-uber"));
             jar.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
             jar.from(javaPluginExtension.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME).getOutput());
             jar.from(precompileTemplatesTask);
@@ -185,7 +199,7 @@ public class Rife2Plugin implements Plugin<Project> {
             var runtimeClasspath = project.getConfigurations().getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME);
             jar.from(runtimeClasspath.getElements().map(e -> e.stream()
                 .filter(f -> f.getAsFile().getName().toLowerCase(Locale.ENGLISH).endsWith(".jar"))
-                .map(project::zipTree)
+                .map(archiveOperations::zipTree)
                 .toList()));
             excludeTemplateSourcesInClassPath(jar, rife2Extension);
             plugins.withId("application", unused -> jar.manifest(manifest ->
@@ -198,22 +212,37 @@ public class Rife2Plugin implements Plugin<Project> {
                                        PluginContainer plugins,
                                        Rife2Extension rife2Extension,
                                        Configuration rife2AgentClasspath) {
-        // Do not make this a lambda since it will prevent Gradle from uniquely identifying the class
-        CommandLineArgumentProvider agentProvider = new CommandLineArgumentProvider() {
-            public Iterable<String> asArguments() {
-                if (Boolean.TRUE.equals(rife2Extension.getUseAgent().get())) {
-                    return Collections.singleton("-javaagent:" + rife2AgentClasspath.getAsPath());
-                }
-                return Collections.emptyList();
-            }
-        };
+        var agentProvider = project.getObjects().newInstance(AgentArgumentProvider.class);
+        agentProvider.getUseAgent().set(rife2Extension.getUseAgent());
+        var noAgent = project.files();
+        agentProvider.getAgentClasspath().from(rife2Extension.getUseAgent().map(useAgent -> useAgent ? rife2AgentClasspath : noAgent));
         project.getTasks().named("test", Test.class, test -> test.getJvmArgumentProviders().add(agentProvider));
-        plugins.withId("application", unused -> project.getTasks().named("run", JavaExec.class, run -> run.getArgumentProviders().add(agentProvider)));
+        plugins.withId("application", unused -> project.getTasks().named("run", JavaExec.class, run -> run.getJvmArgumentProviders().add(agentProvider)));
+    }
+
+    private static void configureAheadOfTimeInstrumentation(Project project,
+                                                            JavaPluginExtension javaPluginExtension,
+                                                            Rife2Extension rife2Extension,
+                                                            Configuration rife2CompilerClasspath,
+                                                            JavaToolchainService javaToolchains) {
+        project.getTasks().named(JavaPlugin.COMPILE_JAVA_TASK_NAME, JavaCompile.class, compile -> {
+            var instrument = project.getObjects().newInstance(InstrumentClassesAction.class);
+            instrument.getEnabled().set(rife2Extension.getInstrumentAheadOfTime());
+            instrument.getClassesDirectory().set(compile.getDestinationDirectory());
+            instrument.getClasspath()
+                .from(rife2CompilerClasspath)
+                .from(compile.getClasspath());
+            instrument.getLauncher().set(javaToolchains.launcherFor(javaPluginExtension.getToolchain()));
+            // toggling the instrumentation has to recompile, since it changes the classes in place
+            compile.getInputs().property("rife2InstrumentAheadOfTime", rife2Extension.getInstrumentAheadOfTime());
+            compile.doLast(instrument);
+        });
     }
 
     private static Rife2Extension createRife2Extension(Project project) {
         var rife2 = project.getExtensions().create("rife2", Rife2Extension.class);
         rife2.getUseAgent().convention(false);
+        rife2.getInstrumentAheadOfTime().convention(false);
         rife2.getUberMainClass().convention(project.getExtensions().getByType(JavaApplication.class).getMainClass()
             .map(mainClass -> mainClass));
         DEFAULT_TEMPLATES_DIRS.stream().forEachOrdered(dir -> rife2.getTemplateDirectories().from(project.files(dir)));

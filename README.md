@@ -13,21 +13,25 @@ Gradle `build.gradle.kts` file:
 ```kotlin
 plugins {
     application
-    id("com.uwyn.rife2") version "1.2.0"
+    id("com.uwyn.rife2") version "1.3.0"
     // ...
 }
 ```
 
-> **NOTE:** the RIFE2 Gradle plugin relies on the presence of the `application`
-> plugin
+> **NOTE:** the RIFE2 Gradle plugin relies on the `application` plugin, which has
+> to be applied before the RIFE2 plugin
+
+The plugin is tested with Gradle 8.14 and Gradle 9, and supports the
+configuration cache.
 
 Afterwards, the `rife2` extension becomes available, and you can use it like
 this:
 
 ```kotlin
 rife2 {
-    version.set("1.8.0")                                    // set the RIFE2 version to use
-    useAgent.set(true)                                      // set whether to run with the RIFE2 agent
+    version.set("1.10.1")                                   // set the RIFE2 version to use
+    useAgent.set(true)                                      // set whether `run` and `test` use the RIFE2 agent
+    instrumentAheadOfTime.set(false)                        // set whether to instrument the classes ahead of time
     uberMainClass.set("hello.AppUber")                      // set a different main class to use for the UberJar
     precompiledTemplateTypes.add(HTML)                      // template types that should be pre-compiled
     templateDirectories.from(file("src/main/templates"))    // additional template directories to use
@@ -35,17 +39,25 @@ rife2 {
 }
 ```
 
-The usual `run`, `test`, `jar` tasks are still available, the RIFE2 plugins adds
+The usual `run`, `test`, `jar` tasks are still available, the RIFE2 plugin adds
 the following:
 
 * `precompileTemplates` : performs the template pre-compilation of the activated types
-* `uberJar` : creates an Uber Jar with everything to run your application standalone
+* `uberjar` : creates an Uber Jar with everything to run your application standalone
 
 ## GraalVM Native Image support
 
 When your project uses the GraalVM Gradle plugin, the RIFE2 Gradle plugin will
 automatically configure the GraalVM plugin to properly include the web application
-resources into the native image.
+resources into the native image. It registers a `copyWebappResources` task that puts
+`src/main/webapp` on the native image classpath.
+
+Continuations, the workflow engine, meta-data merging and lazy-loading rely on the
+RIFE2 agent, which isn't available inside a native image. Setting
+`instrumentAheadOfTime` to `true` applies the same instrumentation to the compiled
+classes instead, and makes the agent unnecessary on the JVM too. Only the classes
+compiled by `compileJava` are instrumented, classes compiled from other JVM languages
+aren't.
 
 ## Get in touch
 
